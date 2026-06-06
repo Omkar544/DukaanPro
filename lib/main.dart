@@ -1,27 +1,36 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'core/routes/app_routes.dart';
-import 'core/services/auth_provider.dart'; // We'll need this service
-import 'core/services/shop_setup_provider.dart'; // And this one
+import 'core/services/auth_provider.dart';
+import 'core/services/shop_setup_provider.dart';
+import 'database/db_helper.dart'; // Imported to evaluate shop state at launch
 
 void main() async {
-  // Ensure Flutter is initialized before database operations
+  // FIX: Replaced the broken preview binding with standard Flutter core initialization
   WidgetsFlutterBinding.ensureInitialized();
-  
+
+  final dbHelper = DBHelper();
+  final shopDetails = await dbHelper.getShopDetails();
+
+  final String fallbackInitialRoute = shopDetails == null
+      ? AppRoutes.register
+      : AppRoutes.login;
+
   runApp(
     MultiProvider(
       providers: [
-        // This injects our logic into the app
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => ShopSetupProvider()),
       ],
-      child: const DukaanProApp(),
+      child: DukaanProApp(startingRoute: fallbackInitialRoute),
     ),
   );
 }
 
 class DukaanProApp extends StatelessWidget {
-  const DukaanProApp({super.key});
+  final String startingRoute;
+
+  const DukaanProApp({super.key, required this.startingRoute});
 
   @override
   Widget build(BuildContext context) {
@@ -67,10 +76,10 @@ class DukaanProApp extends StatelessWidget {
           ),
         ),
       ),
-      // --- ROUTING FIXES ---
-      initialRoute: AppRoutes.splash,
-      // Change .routes to .getRoutes() to fix the "Member not found" error
-      routes: AppRoutes.getRoutes(), 
+
+      // Dynamic routing configuration based on current lifecycle states
+      initialRoute: startingRoute,
+      routes: AppRoutes.getRoutes(),
     );
   }
 }

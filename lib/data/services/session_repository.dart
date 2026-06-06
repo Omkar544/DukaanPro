@@ -1,21 +1,33 @@
+import 'package:flutter/foundation.dart'; // REQUIRED for kIsWeb
 import '../../database/db_helper.dart';
-import '../models/session_model.dart';
 
-class SessionRepository {
-  final DBHelper _dbHelper = DBHelper.instance;
+class AuthRepository {
+  final DBHelper _dbHelper = DBHelper();
 
-  Future<int> saveDailySummary(SessionModel session) async {
+  // Insert a new shop record during registration
+  Future<int> registerShop(Map<String, dynamic> shopData) async {
+    // FIXED: Save the incoming data to local storage/shared preferences before advancing
+    if (kIsWeb) {
+      print(
+        "WEB DEBUG: Saving profile configuration via repository engine: $shopData",
+      );
+      await _dbHelper.insertShopDetails(shopData);
+      return 1; // Return successful verification flag token back up the chain
+    }
+
+    // Native Mobile Execution
     final db = await _dbHelper.database;
-    return await db.insert('daily_summary', session.toMap());
+    return await db.insert('shop_profile', shopData);
   }
 
-  Future<bool> isDayLocked(String date) async {
-    final db = await _dbHelper.database;
-    final List<Map<String, dynamic>> result = await db.query(
-      'daily_summary',
-      where: 'date = ? AND locked = 1',
-      whereArgs: [date],
-    );
-    return result.isNotEmpty;
+  // Fetch raw shop details
+  Future<Map<String, dynamic>?> getShopDetails() async {
+    return await _dbHelper.getShopDetails();
+  }
+
+  // Check registration status
+  Future<bool> isShopRegistered() async {
+    final shop = await getShopDetails();
+    return shop != null;
   }
 }

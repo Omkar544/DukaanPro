@@ -11,7 +11,9 @@ class ShopSetupProvider extends ChangeNotifier {
     _isLoading = true;
     notifyListeners();
     try {
-      await _authRepo.registerShop(shop);
+      await _authRepo.registerShop(
+        shop.toMap(),
+      ); // Fixed: Converts ShopModel to a Map
       _isLoading = false;
       notifyListeners();
       return true;

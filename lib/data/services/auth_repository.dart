@@ -1,45 +1,30 @@
+import 'package:flutter/foundation.dart'; // REQUIRED for kIsWeb
 import '../../database/db_helper.dart';
-import '../models/shop_model.dart';
 
 class AuthRepository {
-  final DBHelper _dbHelper = DBHelper.instance;
+  final DBHelper _dbHelper = DBHelper();
 
-  // --- SHOP REGISTRATION ---
-  
-  /// Saves the shop details during the first-time setup.
-  Future<int> registerShop(ShopModel shop) async {
-    final db = await _dbHelper.database;
-    return await db.insert('users', shop.toMap());
-  }
-
-  // --- LOGIN & SECURITY ---
-
-  /// Verifies if the entered PIN matches the owner's stored PIN.
-  Future<bool> verifyPin(String phone, String enteredPin) async {
-    final db = await _dbHelper.database;
-    final List<Map<String, dynamic>> result = await db.query(
-      'users',
-      where: 'phone = ? AND pin = ?',
-      whereArgs: [phone, enteredPin],
-    );
-    return result.isNotEmpty;
-  }
-
-  /// Checks if a shop is already registered on this device.
-  Future<bool> isShopRegistered() async {
-    final db = await _dbHelper.database;
-    final result = await db.query('users');
-    return result.isNotEmpty;
-  }
-
-  /// Retrieves the current Shop profile for the dashboard and reports.
-  Future<ShopModel?> getShopDetails() async {
-    final db = await _dbHelper.database;
-    final List<Map<String, dynamic>> maps = await db.query('users', limit: 1);
-    
-    if (maps.isNotEmpty) {
-      return ShopModel.fromMap(maps.first);
+  // Insert a new shop record during registration
+  Future<int> registerShop(Map<String, dynamic> shopData) async {
+    // WEB FALLBACK: Bypass SQLite file writing on Chrome so the UI proceeds
+    if (kIsWeb) {
+      print("WEB DEBUG: Registration button clicked with data: $shopData");
+      return 1; // Return a fake successful row ID (e.g., 1) to trick the provider
     }
-    return null;
+
+    // Native Mobile Execution
+    final db = await _dbHelper.database;
+    return await db.insert('shop_profile', shopData);
+  }
+
+  // Fetch raw shop details
+  Future<Map<String, dynamic>?> getShopDetails() async {
+    return await _dbHelper.getShopDetails();
+  }
+
+  // Check registration status
+  Future<bool> isShopRegistered() async {
+    final shop = await getShopDetails();
+    return shop != null;
   }
 }

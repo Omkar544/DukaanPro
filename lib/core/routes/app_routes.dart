@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
-// Update these imports to point to 'features' instead of 'screens'
 import '../../features/splash/splash_screen.dart';
-import '../../features/auth/pin_lock_screen.dart'; // Corrected location
+import '../../features/auth/pin_lock_screen.dart'; 
 import '../../features/shop_setup/shop_setup_screen.dart';
 import '../../features/dashboard/dashboard_screen.dart';
 import '../../features/fast_entry/fast_entry_screen.dart';
 import '../../features/reports/daily_report_screen.dart';
-import '../../features/expenses/expense_list_screen.dart';
+import '../../features/expenses/wholesale_buy_screen.dart'; // FIXED: Pointed to your wholesale stock intake file
 import '../../features/settings/settings_screen.dart';
 
 class AppRoutes {
@@ -22,12 +21,12 @@ class AppRoutes {
   static Map<String, WidgetBuilder> getRoutes() {
     return {
       splash: (context) => const SplashScreen(),
-      login: (context) => const PinLockScreen(), // Pointed to your new PIN screen
-      register: (context) => const ShopSetupScreen(), // Pointed to your setup screen
+      login: (context) => const PinLockScreen(), 
+      register: (context) => const ShopSetupScreen(), 
       dashboard: (context) => const DashboardScreen(),
       customerEntry: (context) => const FastEntryScreen(),
       reports: (context) => const DailyReportScreen(),
-      expense: (context) => const ExpenseListScreen(),
+      expense: (context) => const WholesaleBuyScreen(), // FIXED: Now cleanly maps to your dynamic stock-inward calculator
       settings: (context) => const SettingsScreen(),
     };
   }
